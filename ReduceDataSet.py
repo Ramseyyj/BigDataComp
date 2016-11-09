@@ -104,7 +104,7 @@ def distribution(file, floder, type_dict, lines=0):
         keys = []
         csvwriter = []
 
-        if floder == 'first_second':
+        if floder == 'first_second_test':
             for key in type_dict:
                 temp_file = open(floder+'\\'+key[0]+'_'+key[1], 'w', newline='\n')
                 keys.append(key)
@@ -203,11 +203,17 @@ def csv_to_vectors(file):
         with open(file+'_num.txt', 'w', newline='\n') as writefile:
 
             for row in spamreader:
+
+                rank = row[0]
                 ip = row[3]
                 campid = row[10]
                 mobile_type = row[13]
                 app_key = row[14]
                 user_agent = parse(row[17])
+                # flag = row[21]
+
+                print('%8s, ' % rank, file=writefile, end='')
+                # print('%s, ' % flag, file=writefile, end='')
 
                 if user_agent.is_mobile:
                     print("1.000000", file=writefile, end='')
@@ -226,6 +232,20 @@ def csv_to_vectors(file):
                 print("%f" % (campid_dict[campid] / line_count), file=writefile, end='\n')
 
 
+def add_label(file):
+
+    if '_num.txt' not in file:
+        with open(file, 'r', encoding='utf-8') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter='\x01')
+
+            file1 = open(file+'_num.txt', 'r', encoding='utf-8')
+            file2 = open(file+'_num_1.txt', 'w')
+
+            for row in spamreader:
+                line = file1.readline().strip('\n')
+                print('%s, %s' % (row[21], line), file=file2)
+
+
 start_time = datetime.datetime.now()
 
 category_dict_g, first_type_dict_g, first_second_dict_g = deal_with_media_info()
@@ -235,21 +255,34 @@ category_dict_g, first_type_dict_g, first_second_dict_g = deal_with_media_info()
 
 # distribution(train_dataset_file, 'category', category_dict_g)
 # distribution(train_dataset_file, 'first_type', first_type_dict_g)
-# distribution(train_dataset_file, 'first_second', first_second_dict_g)
+# distribution(test_dataset_file, 'first_second_test', first_second_dict_g)
 
 # reduce_dataset(train_dataset_file, small_train_dataset_file, 10000000)
 
-# reduce_dataset(train_dataset_file, 'small_test', 10000)
+# reduce_dataset(test_dataset_file, 'small_test', 100)
 # print_csv_in_lines('small_test', 10)
 
-first_second_dir = os.path.abspath('.')+'\\first_second'
+# category_dir = os.path.abspath('.')+'\\category'
+# first_type_dir = os.path.abspath('.')+'\\first_type'
+first_second_dir = os.path.abspath('.')+'\\first_second_test'
+#
+# for parent, dirnames, filenames in os.walk(category_dir):
+#     for filename in filenames:
+#         csv_to_vectors(os.path.join(parent, filename))
+#         print('%s is finish' % filename)
+#
+# for parent, dirnames, filenames in os.walk(first_type_dir):
+#     for filename in filenames:
+#         csv_to_vectors(os.path.join(parent, filename))
+#         print('%s is finish' % filename)
 
 for parent, dirnames, filenames in os.walk(first_second_dir):
-
     for filename in filenames:
         csv_to_vectors(os.path.join(parent, filename))
+        print('%s is finish' % filename)
 
 # csv_to_vectors('small_test')
+# add_label('small_test')
 
 end_time = datetime.datetime.now()
 print("运行时间：%ds" % (end_time-start_time).seconds)
