@@ -260,11 +260,11 @@ category_dict_g, first_type_dict_g, first_second_dict_g = deal_with_media_info()
 # reduce_dataset(train_dataset_file, small_train_dataset_file, 10000000)
 
 # reduce_dataset(test_dataset_file, 'small_test', 100)
-# print_csv_in_lines('small_test', 10)
+print_csv_in_lines('small_test', 10)
 
 # category_dir = os.path.abspath('.')+'\\category'
 # first_type_dir = os.path.abspath('.')+'\\first_type'
-first_second_dir = os.path.abspath('.')+'\\first_second_test'
+# first_second_dir = os.path.abspath('.')+'\\first_second_test'
 #
 # for parent, dirnames, filenames in os.walk(category_dir):
 #     for filename in filenames:
@@ -276,10 +276,10 @@ first_second_dir = os.path.abspath('.')+'\\first_second_test'
 #         csv_to_vectors(os.path.join(parent, filename))
 #         print('%s is finish' % filename)
 
-for parent, dirnames, filenames in os.walk(first_second_dir):
-    for filename in filenames:
-        csv_to_vectors(os.path.join(parent, filename))
-        print('%s is finish' % filename)
+# for parent, dirnames, filenames in os.walk(first_second_dir):
+#     for filename in filenames:
+#         csv_to_vectors(os.path.join(parent, filename))
+#         print('%s is finish' % filename)
 
 # csv_to_vectors('small_test')
 # add_label('small_test')
