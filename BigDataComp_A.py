@@ -134,13 +134,9 @@ last_time = datetime.datetime.now()
 first_second_dir = os.path.abspath('.')+'\\first_second_test'
 
 for parent, dirnames, filenames in os.walk(first_second_dir):
-    flag = True
+
     for filename in filenames:
-        if flag:
-            csv_to_vectors(parent, filename)
-            now_time = datetime.datetime.now()
-            print('%s is finish, takes %d second' % (filename, (now_time - last_time).seconds))
-            last_time = now_time
-            flag = False
-
-
+        csv_to_vectors(parent, filename)
+        now_time = datetime.datetime.now()
+        print('%s is finish, takes %d second' % (filename, (now_time - last_time).seconds))
+        last_time = now_time
