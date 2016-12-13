@@ -4,8 +4,8 @@ import os
 from user_agents import parse
 
 
-train_dataset_file = 'F:\\AdMaster_competition_dataset\\AdMaster_train_dataset'
-test_dataset_file = 'F:\\AdMaster_competition_dataset\\final_ccf_test_0919'
+# train_dataset_file = 'F:\\AdMaster_competition_dataset\\AdMaster_train_dataset'
+# test_dataset_file = 'F:\\AdMaster_competition_dataset\\final_ccf_test_0919'
 media_info_file = 'F:\\AdMaster_competition_dataset\\ccf_media_info.csv'
 
 
@@ -23,16 +23,25 @@ def print_num_vector(flag_m, spamreader, writefile, ip_dict, campid_dict, mobile
 
     for row in spamreader:
 
-        rank = row[0]
-        ip = row[3]
-        campid = row[10]
-        mobile_type = row[13]
-        app_key = row[14]
-        user_agent = parse(row[17])
-
         if flag_m:
-            print('%s, ' % row[21], file=writefile, end='')
+
+            ip = row[2]
+            campid = row[4]
+            mobile_type = row[14]
+            app_key = row[15]
+            user_agent = parse(row[18])
+            label = row[22]
+
+            print('%s, ' % label, file=writefile, end='')
         else:
+
+            rank = row[0]
+            ip = row[3]
+            campid = row[5]
+            mobile_type = row[15]
+            app_key = row[16]
+            user_agent = parse(row[19])
+
             print('%8s, ' % rank, file=writefile, end='')
 
         if user_agent.is_mobile:
@@ -62,81 +71,101 @@ def csv_to_vectors(parent_m, filename_m):
     result_file = os.path.abspath('.')+'\\result_A\\'+filename_m
 
     with open(train_filename, 'r', encoding='utf-8') as csvfile_train:
-        spamreader_train = csv.reader(csvfile_train, delimiter='\x01')
+        spamreader_train = csv.reader(csvfile_train, delimiter=',')
 
-        with open(test_filename, 'r', encoding='utf-8') as csvfile_test:
-            spamreader_test = csv.reader(csvfile_test, delimiter='\x01')
+        ip_dict = {}
+        campid_dict = {}
+        mobile_dict = {}
 
-            ip_dict = {}
-            campid_dict = {}
-            mobile_dict = {}
+        line_count = 0
+        for row in spamreader_train:
+            line_count += 1
 
-            line_count = 0
-            for row in spamreader_train:
-                line_count += 1
+            ip = row[2]
+            campid = row[4]
+            mobile_type = row[14]
+            app_key = row[15]
+            # user_agent = parse(row[17])
 
-                ip = row[3]
-                campid = row[10]
-                mobile_type = row[13]
-                app_key = row[14]
-                # user_agent = parse(row[17])
+            if app_key != '':
+                if app_key in mobile_dict.keys():
+                    mobile_dict[app_key] = dict_add_item(mobile_type, mobile_dict[app_key])
+                else:
+                    mobile_dict[app_key] = {}
+                    mobile_dict[app_key][mobile_type] = 1
 
-                if app_key != '':
-                    if app_key in mobile_dict.keys():
-                        mobile_dict[app_key] = dict_add_item(mobile_type, mobile_dict[app_key])
-                    else:
-                        mobile_dict[app_key] = {}
-                        mobile_dict[app_key][mobile_type] = 1
+            ip_dict = dict_add_item(ip, ip_dict)
+            campid_dict = dict_add_item(campid, campid_dict)
 
-                ip_dict = dict_add_item(ip, ip_dict)
-                campid_dict = dict_add_item(campid, campid_dict)
-
-            for row in spamreader_test:
-                line_count += 1
-
-                ip = row[3]
-                campid = row[10]
-                mobile_type = row[13]
-                app_key = row[14]
-                # user_agent = parse(row[17])
-
-                if app_key != '':
-                    if app_key in mobile_dict.keys():
-                        mobile_dict[app_key] = dict_add_item(mobile_type, mobile_dict[app_key])
-                    else:
-                        mobile_dict[app_key] = {}
-                        mobile_dict[app_key][mobile_type] = 1
-
-                ip_dict = dict_add_item(ip, ip_dict)
-                campid_dict = dict_add_item(campid, campid_dict)
-
-            mobile_count_in_appkey_dict = {}
-            for key in mobile_dict.keys():
-                temp_sum = 0
-                for mobile in mobile_dict[key].keys():
-                    temp_sum += mobile_dict[key][mobile]
-                mobile_count_in_appkey_dict[key] = temp_sum
+        mobile_count_in_appkey_dict = {}
+        for key in mobile_dict.keys():
+            temp_sum = 0
+            for mobile in mobile_dict[key].keys():
+                temp_sum += mobile_dict[key][mobile]
+            mobile_count_in_appkey_dict[key] = temp_sum
 
     with open(train_filename, 'r', encoding='utf-8') as csvfile_train:
-        spamreader_train = csv.reader(csvfile_train, delimiter='\x01')
+        spamreader_train = csv.reader(csvfile_train, delimiter=',')
 
-        with open(test_filename, 'r', encoding='utf-8') as csvfile_test:
-            spamreader_test = csv.reader(csvfile_test, delimiter='\x01')
+        writefile_train = open(result_file + '_num_train.txt', 'w', newline='\n')
+        print_num_vector(True, spamreader_train, writefile_train, ip_dict, campid_dict, mobile_dict,
+                         mobile_count_in_appkey_dict, line_count)
 
-            writefile_train = open(result_file+'_num_train.txt', 'w', newline='\n')
-            writefile_test = open(result_file+'_num_test.txt', 'w', newline='\n')
+    with open(test_filename, 'r', encoding='utf-8') as csvfile_test:
+        spamreader_test = csv.reader(csvfile_test, delimiter=',')
 
-            print_num_vector(True, spamreader_train, writefile_train, ip_dict, campid_dict, mobile_dict, mobile_count_in_appkey_dict, line_count)
-            print_num_vector(False, spamreader_test, writefile_test, ip_dict, campid_dict, mobile_dict, mobile_count_in_appkey_dict, line_count)
+        ip_dict = {}
+        campid_dict = {}
+        mobile_dict = {}
+
+        line_count = 0
+        for row in spamreader_test:
+            line_count += 1
+
+            ip = row[3]
+            campid = row[5]
+            mobile_type = row[15]
+            app_key = row[16]
+            # user_agent = parse(row[17])
+
+            if app_key != '':
+                if app_key in mobile_dict.keys():
+                    mobile_dict[app_key] = dict_add_item(mobile_type, mobile_dict[app_key])
+                else:
+                    mobile_dict[app_key] = {}
+                    mobile_dict[app_key][mobile_type] = 1
+
+            ip_dict = dict_add_item(ip, ip_dict)
+            campid_dict = dict_add_item(campid, campid_dict)
+
+        mobile_count_in_appkey_dict = {}
+        for key in mobile_dict.keys():
+            temp_sum = 0
+            for mobile in mobile_dict[key].keys():
+                temp_sum += mobile_dict[key][mobile]
+            mobile_count_in_appkey_dict[key] = temp_sum
+
+    with open(test_filename, 'r', encoding='utf-8') as csvfile_test:
+
+        spamreader_test = csv.reader(csvfile_test, delimiter=',')
+
+        writefile_test = open(result_file+'_num_test.txt', 'w', newline='\n')
+
+        print_num_vector(False, spamreader_test, writefile_test, ip_dict, campid_dict, mobile_dict,
+                         mobile_count_in_appkey_dict, line_count)
 
 last_time = datetime.datetime.now()
 
 first_second_dir = os.path.abspath('.')+'\\first_second_test'
 
+temp_count = 0
+
 for parent, dirnames, filenames in os.walk(first_second_dir):
 
     for filename in filenames:
-        csv_to_vectors(parent, filename)
-        now_time = datetime.datetime.now()
-        print('%s is finish, takes %d second' % (filename, (now_time - last_time).seconds))
-        last_time = now_time
+        temp_count += 1
+        if temp_count > 20:
+            csv_to_vectors(parent, filename)
+            now_time = datetime.datetime.now()
+            print('%s is finish, takes %d second' % (filename, (now_time - last_time).seconds))
+            last_time = now_time

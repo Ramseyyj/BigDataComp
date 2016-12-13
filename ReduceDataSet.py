@@ -4,8 +4,8 @@ import os
 from user_agents import parse
 
 
-train_dataset_file = 'F:\\AdMaster_competition_dataset\\AdMaster_train_dataset'
-test_dataset_file = 'F:\\AdMaster_competition_dataset\\final_ccf_test_0919'
+train_dataset_file = 'F:\\AdMaster_competition_dataset\\ccf_data_train'
+test_dataset_file = 'F:\\AdMaster_competition_dataset\\ccf_data_test'
 media_info_file = 'F:\\AdMaster_competition_dataset\\ccf_media_info.csv'
 
 small_train_dataset_file = 'small_train_dataset'
@@ -68,11 +68,11 @@ def deal_with_media_info():
 def print_csv_in_lines(file, lines=0):
 
     with open(file, 'r', encoding='utf-8') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter='\x01')
+        spamreader = csv.reader(csvfile, delimiter=',')
         if lines != 0:
             testline = lines
             for row in spamreader:
-                print(row)
+                print(row[19])
                 testline -= 1
                 if testline == 0:
                     break
@@ -84,10 +84,10 @@ def print_csv_in_lines(file, lines=0):
 def reduce_dataset(origin_file, reduce_file, reduce_lines):
 
     with open(origin_file, 'r', encoding='utf-8') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter='\x01')
+        spamreader = csv.reader(csvfile, delimiter=',')
 
         with open(reduce_file, 'w', newline='\n') as csvwritefile:
-            csvwriter = csv.writer(csvwritefile, delimiter='\x01')
+            csvwriter = csv.writer(csvwritefile, delimiter=',')
             testline = reduce_lines
             for row in spamreader:
                 csvwriter.writerow(row)
@@ -96,25 +96,30 @@ def reduce_dataset(origin_file, reduce_file, reduce_lines):
                     break
 
 
-def distribution(file, floder, type_dict, lines=0):
+def distribution(file, floder, type_dict, media_id_index, lines=0):
 
     with open(file, 'r', encoding='utf-8') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter='\x01')
+        spamreader = csv.reader(csvfile, delimiter=',')
 
         keys = []
         csvwriter = []
 
-        if floder == 'first_second_test':
-            for key in type_dict:
-                temp_file = open(floder+'\\'+key[0]+'_'+key[1], 'w', newline='\n')
-                keys.append(key)
-                csvwriter.append(csv.writer(temp_file, delimiter='\x01'))
+        for key in type_dict:
+            temp_file = open(floder + '\\' + key[0] + '_' + key[1], 'w', newline='\n')
+            keys.append(key)
+            csvwriter.append(csv.writer(temp_file, delimiter=','))
 
-        else:
-            for key in type_dict:
-                temp_file = open(floder+'\\'+key+'_', 'w', newline='\n')
-                keys.append(key)
-                csvwriter.append(csv.writer(temp_file, delimiter='\x01'))
+        # if floder == 'first_second_test':
+        #     for key in type_dict:
+        #         temp_file = open(floder+'\\'+key[0]+'_'+key[1], 'w', newline='\n')
+        #         keys.append(key)
+        #         csvwriter.append(csv.writer(temp_file, delimiter=','))
+        #
+        # else:
+        #     for key in type_dict:
+        #         temp_file = open(floder+'\\'+key+'_', 'w', newline='\n')
+        #         keys.append(key)
+        #         csvwriter.append(csv.writer(temp_file, delimiter=','))
 
         writer_dict = dict(zip(keys, csvwriter))
 
@@ -130,7 +135,7 @@ def distribution(file, floder, type_dict, lines=0):
                     now_line = 0
 
                 for key in type_dict:
-                    if row[18] in type_dict[key]:
+                    if row[media_id_index] in type_dict[key]:
                         writer_dict[key].writerow(row)
                         break
 
@@ -146,7 +151,7 @@ def distribution(file, floder, type_dict, lines=0):
                     now_line = 0
 
                 for key in type_dict:
-                    if row[18] in type_dict[key]:
+                    if row[media_id_index] in type_dict[key]:
                         writer_dict[key].writerow(row)
                         break
 
@@ -248,6 +253,9 @@ def add_label(file):
 
 start_time = datetime.datetime.now()
 
+# print_csv_in_lines(train_dataset_file, 10)
+
+
 category_dict_g, first_type_dict_g, first_second_dict_g = deal_with_media_info()
 # print(category_dict_g)
 # print(first_type_dict_g)
@@ -255,12 +263,13 @@ category_dict_g, first_type_dict_g, first_second_dict_g = deal_with_media_info()
 
 # distribution(train_dataset_file, 'category', category_dict_g)
 # distribution(train_dataset_file, 'first_type', first_type_dict_g)
-# distribution(test_dataset_file, 'first_second_test', first_second_dict_g)
+distribution(train_dataset_file, 'first_second', first_second_dict_g, 19)
+distribution(test_dataset_file, 'first_second_test', first_second_dict_g, 20)
 
 # reduce_dataset(train_dataset_file, small_train_dataset_file, 10000000)
 
-# reduce_dataset(test_dataset_file, 'small_test', 100)
-print_csv_in_lines('small_test', 10)
+# reduce_dataset(train_dataset_file, 'small_test', 100)
+# print_csv_in_lines('small_test', 10)
 
 # category_dir = os.path.abspath('.')+'\\category'
 # first_type_dir = os.path.abspath('.')+'\\first_type'
